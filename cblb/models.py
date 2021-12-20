@@ -1146,6 +1146,358 @@ def CLB_model_stochastic(state, params, Omega):
     return p_toggle_IO + p_toggle_I1 + p_toggle_I2 + p_toggle_I3 + p_mux
 
 
+def DECODER_2_4_model(state, T, params):
+    delta_L, gamma_L_X, n_y, theta_L_X, eta_x, omega_x, m_x, delta_x, rho_x, gamma_x, theta_x, r_X = params
+    params_yes = gamma_x, n_y, theta_x, delta_x, rho_x
+    params_not = delta_L, gamma_L_X, n_y, theta_L_X, eta_x, omega_x, m_x, delta_x, rho_x
+
+    A0, A1 = state[:2]
+    D0_out, D1_out, D2_out, D3_out = state[2:6]
+    L_D1_A0, L_D2_A1, L_D3_A0, L_D3_A1, L_D0, L_D1, L_D2, L_D3 = state[6:14]
+    N_D0_A0, N_D0_A1, N_D1_A0, N_D1_A1, N_D2_A0, N_D2_A1, N_D3_A0, N_D3_A1, N_D0, N_D1, N_D2, N_D3 = state[14:26]
+    out = state[26]
+
+    """
+     D0
+    """
+    dD0_out = 0
+
+    # yes A0: D0_A0
+    state_yes_D0_A0 = D0_out, A0, N_D0_A0
+    dD0_out += yes_cell_wrapper(state_yes_D0_A0, params_yes)
+    dN_D0_A0 = population(N_D0_A0, r_X)
+
+    # yes A1: D0_A1
+    state_yes_D0_A1 = D0_out, A1, N_D0_A1
+    dD0_out += yes_cell_wrapper(state_yes_D0_A1, params_yes)
+    dN_D0_A1 = population(N_D0_A1, r_X)
+
+    """
+     D1
+    """
+    dD1_out = 0
+
+    # not A0: D1_A0
+    state_not_D1_A0 = L_D1_A0, D1_out, A0, N_D1_A0
+    dL_D1_A0, dd = not_cell_wrapper(state_not_D1_A0, params_not)
+    dD1_out += dd
+    dN_D1_A0 = population(N_D1_A0, r_X)
+
+    # yes A1: D1_S1
+    state_yes_D1_A1 = D1_out, A1, N_D1_A1
+    dD1_out += yes_cell_wrapper(state_yes_D1_A1, params_yes)
+    dN_D1_A1 = population(N_D1_A1, r_X)
+
+    """
+    D2
+    """
+    dD2_out = 0
+
+    # yes A0: D2_A0
+    state_yes_D2_A0 = D2_out, A0, N_D2_A0
+    dD2_out += yes_cell_wrapper(state_yes_D2_A0, params_yes)
+    dN_D2_A0 = population(N_D2_A0, r_X)
+
+    # not A1: D2_A1
+    state_not_D2_A1 = L_D2_A1, D2_out, A1, N_D2_A1
+    dL_D2_A1, dd = not_cell_wrapper(state_not_D2_A1, params_not)
+    dD2_out += dd
+    dN_D2_A1 = population(N_D2_A1, r_X)
+
+
+    """
+    D3
+    """
+    dD3_out = 0
+
+    # not A0: D3_A0
+    state_not_D3_A0 = L_D3_A0, D3_out, A0, N_D3_A0
+    dL_D3_A0, dd = not_cell_wrapper(state_not_D3_A0, params_not)
+    dD3_out += dd
+    dN_D3_A0 = population(N_D3_A0, r_X)
+
+    # not A1: D3_A1
+    state_not_D3_A1 = L_D3_A1, D3_out, A1, N_D3_A1
+    dL_D3_A1, dd = not_cell_wrapper(state_not_D3_A1, params_not)
+    dD3_out += dd
+    dN_D3_A1 = population(N_D3_A1, r_X)
+
+    """
+    out
+    """
+
+    # not D0: D0
+    state_not_D0 = L_D0, out, D0_out, N_D0
+    dL_D0, doutD0 = not_cell_wrapper(state_not_D0, params_not)
+    dN_D0 = population(N_D0, r_X)
+
+    # not D1: D1
+    state_not_D1 = L_D1, out, D1_out, N_D1
+    dL_D1, doutD1 = not_cell_wrapper(state_not_D1, params_not)
+    dN_D1 = population(N_D1, r_X)
+
+    # not D2: D2
+    state_not_D2 = L_D2, out, D2_out, N_D2
+    dL_D2, doutD2 = not_cell_wrapper(state_not_D2, params_not)
+    dN_D2 = population(N_D2, r_X)
+
+    # not D3: D3
+    state_not_D3 = L_D3, out, D3_out, N_D3
+    dL_D3, doutD3 = not_cell_wrapper(state_not_D3, params_not)
+    dN_D3 = population(N_D3, r_X)
+
+    dA0, dA1 = 0, 0
+
+    dstate = np.array([dA0, dA1,
+                       dD0_out, dD1_out, dD2_out, dD3_out,
+                       dL_D1_A0, dL_D2_A1, dL_D3_A0, dL_D3_A1, dL_D0, dL_D1, dL_D2, dL_D3,
+                       dN_D0_A0, dN_D0_A1, dN_D1_A0, dN_D1_A1, dN_D2_A0, dN_D2_A1,
+                       dN_D3_A0, dN_D3_A1, dN_D0, dN_D1, dN_D2, dN_D3,
+                       doutD0, doutD1, doutD2, doutD3])
+
+    return dstate
+
+def DECODER_3_8_model(state, T, params):
+    delta_L, gamma_L_X, n_y, theta_L_X, eta_x, omega_x, m_x, delta_x, rho_x, gamma_x, theta_x, r_X = params
+    params_yes = gamma_x, n_y, theta_x, delta_x, rho_x
+    params_not = delta_L, gamma_L_X, n_y, theta_L_X, eta_x, omega_x, m_x, delta_x, rho_x
+
+    A0, A1, A2 = state[:3]
+    D0_out, D1_out, D2_out, D3_out, D4_out, D5_out, D6_out, D7_out = state[3:11]
+    L_D1_A0, L_D2_A1, L_D3_A0, L_D3_A1, L_D4_A2, L_D5_A0, L_D5_A2, L_D6_A0, L_D7_A0, L_D7_A1, L_D7_A2, L_D0, L_D1, L_D2, L_D3, L_D4, L_D5, L_D6, L_D7 = state[11:30]
+    N_D0_A0, N_D0_A1, N_D0_A2, N_D1_A0, N_D1_A1, N_D1_A2, N_D2_A0, N_D2_A1, N_D2_A2, N_D3_A0, N_D3_A1, N_D3_A2, \
+    N_D4_A0, N_D4_A1, N_D4_A2, N_D5_A0, N_D5_A1, N_D5_A2, N_D6_A0, N_D6_A1, N_D6_A2, N_D7_A0, N_D7_A1, N_D7_A2, \
+    N_D0, N_D1, N_D2, N_D3, N_D4, N_D5, N_D6, N_D7 = state[30:62]
+    out = state[62]
+
+    """
+     D0
+    """
+    dD0_out = 0
+
+    # yes A0: D0_A0
+    state_yes_D0_A0 = D0_out, A0, N_D0_A0
+    dD0_out += yes_cell_wrapper(state_yes_D0_A0, params_yes)
+    dN_D0_A0 = population(N_D0_A0, r_X)
+
+    # yes A1: D0_A1
+    state_yes_D0_A1 = D0_out, A1, N_D0_A1
+    dD0_out += yes_cell_wrapper(state_yes_D0_A1, params_yes)
+    dN_D0_A1 = population(N_D0_A1, r_X)
+
+    # yes A2: D0_A2
+    state_yes_D0_A2 = D0_out, A2, N_D0_A2
+    dD0_out += yes_cell_wrapper(state_yes_D0_A2, params_yes)
+    dN_D0_A2 = population(N_D0_A2, r_X)
+
+    """
+     D1
+    """
+    dD1_out = 0
+
+    # not A0: D1_A0
+    state_not_D1_A0 = L_D1_A0, D1_out, A0, N_D1_A0
+    dL_D1_A0, dd = not_cell_wrapper(state_not_D1_A0, params_not)
+    dD1_out += dd
+    dN_D1_A0 = population(N_D1_A0, r_X)
+
+    # yes A1: D1_A1
+    state_yes_D1_A1 = D1_out, A1, N_D1_A1
+    dD1_out += yes_cell_wrapper(state_yes_D1_A1, params_yes)
+    dN_D1_A1 = population(N_D1_A1, r_X)
+
+    # yes A2: D1_A2
+    state_yes_D1_A2 = D1_out, A2, N_D1_A2
+    dD1_out += yes_cell_wrapper(state_yes_D1_A2, params_yes)
+    dN_D1_A2 = population(N_D1_A2, r_X)
+
+    """
+    D2
+    """
+    dD2_out = 0
+
+    # yes A0: D2_A0
+    state_yes_D2_A0 = D2_out, A0, N_D2_A0
+    dD2_out += yes_cell_wrapper(state_yes_D2_A0, params_yes)
+    dN_D2_A0 = population(N_D2_A0, r_X)
+
+    # not A1: D2_A1
+    state_not_D2_A1 = L_D2_A1, D2_out, A1, N_D2_A1
+    dL_D2_A1, dd = not_cell_wrapper(state_not_D2_A1, params_not)
+    dD2_out += dd
+    dN_D2_A1 = population(N_D2_A1, r_X)
+
+    # yes A2: D2_A2
+    state_yes_D2_A2 = D2_out, A2, N_D2_A2
+    dD2_out += yes_cell_wrapper(state_yes_D2_A2, params_yes)
+    dN_D2_A2 = population(N_D2_A2, r_X)
+
+    """
+    D3
+    """
+    dD3_out = 0
+
+    # not A0: D3_A0
+    state_not_D3_A0 = L_D3_A0, D3_out, A0, N_D3_A0
+    dL_D3_A0, dd = not_cell_wrapper(state_not_D3_A0, params_not)
+    dD3_out += dd
+    dN_D3_A0 = population(N_D3_A0, r_X)
+
+    # not A1: D3_A1
+    state_not_D3_A1 = L_D3_A1, D3_out, A1, N_D3_A1
+    dL_D3_A1, dd = not_cell_wrapper(state_not_D3_A1, params_not)
+    dD3_out += dd
+    dN_D3_A1 = population(N_D3_A1, r_X)
+
+    # yes A2: D3_A2
+    state_yes_D3_A2 = D3_out, A2, N_D3_A2
+    dD3_out += yes_cell_wrapper(state_yes_D3_A2, params_yes)
+    dN_D3_A2 = population(N_D3_A2, r_X)
+
+    """
+    D4
+    """
+    dD4_out = 0
+
+    # yes A0: D2_A0
+    state_yes_D4_A0 = D4_out, A0, N_D4_A0
+    dD4_out += yes_cell_wrapper(state_yes_D4_A0, params_yes)
+    dN_D4_A0 = population(N_D4_A0, r_X)
+
+    # yes A1: D4_A1
+    state_yes_D4_A1 = D4_out, A1, N_D4_A1
+    dD4_out += yes_cell_wrapper(state_yes_D4_A1, params_yes)
+    dN_D4_A1 = population(N_D4_A1, r_X)
+
+    # not A2: D4_A2
+    state_not_D4_A2 = L_D4_A2, D4_out, A2, N_D4_A2
+    dL_D4_A2, dd = not_cell_wrapper(state_not_D4_A2, params_not)
+    dD4_out += dd
+    dN_D4_A2 = population(N_D4_A2, r_X)
+
+    """
+    D5
+    """
+    dD5_out = 0
+
+    # not A0: D5_A0
+    state_not_D5_A0 = L_D5_A0, D5_out, A0, N_D5_A0
+    dL_D5_A0, dd = not_cell_wrapper(state_not_D5_A0, params_not)
+    dD5_out += dd
+    dN_D5_A0 = population(N_D5_A0, r_X)
+
+    # yes A1: D5_A1
+    state_yes_D5_A1 = D5_out, A1, N_D5_A1
+    dD5_out += yes_cell_wrapper(state_yes_D5_A1, params_yes)
+    dN_D5_A1 = population(N_D5_A1, r_X)
+
+    # not A2: D5_A2
+    state_not_D5_A2 = L_D5_A2, D5_out, A2, N_D5_A2
+    dL_D5_A2, dd = not_cell_wrapper(state_not_D5_A2, params_not)
+    dD5_out += dd
+    dN_D5_A2 = population(N_D5_A2, r_X)
+
+    """
+    D6
+    """
+    dD6_out = 0
+
+    # not A0: D6_A0
+    state_not_D6_A0 = L_D6_A0, D6_out, A0, N_D6_A0
+    dL_D6_A0, dd = not_cell_wrapper(state_not_D6_A0, params_not)
+    dD6_out += dd
+    dN_D6_A0 = population(N_D6_A0, r_X)
+
+    # yes A1: D6_A1
+    state_yes_D6_A1 = D6_out, A1, N_D6_A1
+    dD6_out += yes_cell_wrapper(state_yes_D6_A1, params_yes)
+    dN_D6_A1 = population(N_D6_A1, r_X)
+
+    # yes A2: D6_A2
+    state_yes_D6_A2 = D6_out, A2, N_D6_A2
+    dD6_out += yes_cell_wrapper(state_yes_D6_A2, params_yes)
+    dN_D6_A2 = population(N_D6_A2, r_X)
+
+    """
+    D7
+    """
+    dD7_out = 0
+
+    # not A0: D7_A0
+    state_not_D7_A0 = L_D7_A0, D7_out, A0, N_D7_A0
+    dL_D7_A0, dd = not_cell_wrapper(state_not_D7_A0, params_not)
+    dD7_out += dd
+    dN_D7_A0 = population(N_D7_A0, r_X)
+
+    # not A1: D7_A1
+    state_not_D7_A1 = L_D7_A1, D7_out, A1, N_D7_A1
+    dL_D7_A1, dd = not_cell_wrapper(state_not_D7_A1, params_not)
+    dD7_out += dd
+    dN_D7_A1 = population(N_D7_A1, r_X)
+
+    # not A2: D7_A2
+    state_not_D7_A2 = L_D7_A2, D7_out, A2, N_D7_A2
+    dL_D7_A2, dd = not_cell_wrapper(state_not_D7_A2, params_not)
+    dD7_out += dd
+    dN_D7_A2 = population(N_D7_A2, r_X)
+
+    """
+    out
+    """
+
+    # not D0: D0
+    state_not_D0 = L_D0, out, D0_out, N_D0
+    dL_D0, doutD0 = not_cell_wrapper(state_not_D0, params_not)
+    dN_D0 = population(N_D0, r_X)
+
+    # not D1: D1
+    state_not_D1 = L_D1, out, D1_out, N_D1
+    dL_D1, doutD1 = not_cell_wrapper(state_not_D1, params_not)
+    dN_D1 = population(N_D1, r_X)
+
+    # not D2: D2
+    state_not_D2 = L_D2, out, D2_out, N_D2
+    dL_D2, doutD2 = not_cell_wrapper(state_not_D2, params_not)
+    dN_D2 = population(N_D2, r_X)
+
+    # not D3: D3
+    state_not_D3 = L_D3, out, D3_out, N_D3
+    dL_D3, doutD3 = not_cell_wrapper(state_not_D3, params_not)
+    dN_D3 = population(N_D3, r_X)
+
+    # not D4: D4
+    state_not_D4 = L_D4, out, D4_out, N_D4
+    dL_D4, doutD4 = not_cell_wrapper(state_not_D4, params_not)
+    dN_D4 = population(N_D4, r_X)
+
+    # not D5: D5
+    state_not_D5 = L_D5, out, D5_out, N_D5
+    dL_D5, doutD5 = not_cell_wrapper(state_not_D5, params_not)
+    dN_D5 = population(N_D5, r_X)
+
+    # not D6: D6
+    state_not_D6 = L_D6, out, D6_out, N_D6
+    dL_D6, doutD6 = not_cell_wrapper(state_not_D6, params_not)
+    dN_D6 = population(N_D6, r_X)
+
+    # not D7: D7
+    state_not_D7 = L_D7, out, D7_out, N_D7
+    dL_D7, doutD7 = not_cell_wrapper(state_not_D7, params_not)
+    dN_D7 = population(N_D7, r_X)
+
+    dA0, dA1, DA2 = 0, 0, 0
+
+    dstate = np.array([dA0, dA1, DA2,
+                       dD0_out, dD1_out, dD2_out, dD3_out, dD4_out, dD5_out, dD6_out, dD7_out,
+                       dL_D1_A0, dL_D2_A1, dL_D3_A0, dL_D3_A1, dL_D4_A2, dL_D5_A0, dL_D5_A2, dL_D6_A0, dL_D7_A0, dL_D7_A1, dL_D7_A2,
+                       dL_D0, dL_D1, dL_D2, dL_D3, dL_D4, dL_D5, dL_D6, dL_D7,
+                       dN_D0_A0, dN_D0_A1, dN_D0_A2, dN_D1_A0, dN_D1_A1, dN_D1_A2, dN_D2_A0, dN_D2_A1, dN_D2_A2,
+                       dN_D3_A0, dN_D3_A1, dN_D3_A2, dN_D4_A0, dN_D4_A1, dN_D4_A2, dN_D5_A0, dN_D5_A1, dN_D5_A2, dN_D6_A0, dN_D6_A1, dN_D6_A2,
+                       dN_D7_A0, dN_D7_A1, dN_D7_A2,
+                       dN_D0, dN_D1, dN_D2, dN_D3, dN_D4, dN_D5, dN_D6, dN_D7,
+                       doutD0, doutD1, doutD2, doutD3, doutD4, doutD5, doutD6, doutD7])
+
+    return dstate
 
 """
 wrappers for scipy.integrate.ode
@@ -1167,3 +1519,8 @@ def MUX_4_1_model_ODE(T, state, params):
 def CLB_model_ODE(T, state, params):
     return CLB_model(state, T, params)
 
+def DECODER_2_4_model_ODE(T, state, params):
+    return DECODER_2_4_model(state, T, params)
+
+def DECODER_3_8_model_ODE(T, state, params):
+    return DECODER_3_8_model(state, T, params)
