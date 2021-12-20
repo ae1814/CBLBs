@@ -19,7 +19,7 @@ t_end = 1500
 N = t_end
 
 
-Y0 = np.zeros(63)
+Y0 = np.zeros(70)
 Y0[30:62] = 1 # number of cells
 
 Y0[:3] = A
@@ -30,7 +30,7 @@ T = np.linspace(0, t_end, N)
 t1 = t_end
 dt = t_end/N
 T = np.arange(0,t1+dt,dt)
-Y = np.zeros([1+N,63])
+Y = np.zeros([1+N,70])
 Y[0,:] = Y0
 
 r = ode(DECODER_3_8_model_ODE).set_integrator('zvode', method='bdf')
@@ -41,10 +41,46 @@ while r.successful() and r.t < t1:
     Y[i,:] = r.integrate(r.t+dt)
     i += 1
 
+# D7
 out = Y[:,-1]
 plt.plot(T,out)
+plt.title("D7")
 plt.show()
-
+# D6
+out = Y[:,-2]
+plt.plot(T,out)
+plt.title("D6")
+plt.show()
+# D5
+out = Y[:,-3]
+plt.plot(T,out)
+plt.title("D5")
+plt.show()
+# D4
+out = Y[:,-4]
+plt.plot(T,out)
+plt.title("D4")
+plt.show()
+# D3
+out = Y[:,-5]
+plt.plot(T,out)
+plt.title("D3")
+plt.show()
+# D2
+out = Y[:,-6]
+plt.plot(T,out)
+plt.title("D2")
+plt.show()
+# D1
+out = Y[:,-7]
+plt.plot(T,out)
+plt.title("D1")
+plt.show()
+# D0
+out = Y[:,-8]
+plt.plot(T,out)
+plt.title("D0")
+plt.show()
 
 """
 # Y = a, b, N_A

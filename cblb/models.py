@@ -1155,7 +1155,7 @@ def DECODER_2_4_model(state, T, params):
     D0_out, D1_out, D2_out, D3_out = state[2:6]
     L_D1_A0, L_D2_A1, L_D3_A0, L_D3_A1, L_D0, L_D1, L_D2, L_D3 = state[6:14]
     N_D0_A0, N_D0_A1, N_D1_A0, N_D1_A1, N_D2_A0, N_D2_A1, N_D3_A0, N_D3_A1, N_D0, N_D1, N_D2, N_D3 = state[14:26]
-    out = state[26]
+    out_D0, out_D1, out_D2, out_D3 = state[26:30]
 
     """
      D0
@@ -1227,22 +1227,22 @@ def DECODER_2_4_model(state, T, params):
     """
 
     # not D0: D0
-    state_not_D0 = L_D0, out, D0_out, N_D0
+    state_not_D0 = L_D0, out_D0, D0_out, N_D0
     dL_D0, doutD0 = not_cell_wrapper(state_not_D0, params_not)
     dN_D0 = population(N_D0, r_X)
 
     # not D1: D1
-    state_not_D1 = L_D1, out, D1_out, N_D1
+    state_not_D1 = L_D1, out_D1, D1_out, N_D1
     dL_D1, doutD1 = not_cell_wrapper(state_not_D1, params_not)
     dN_D1 = population(N_D1, r_X)
 
     # not D2: D2
-    state_not_D2 = L_D2, out, D2_out, N_D2
+    state_not_D2 = L_D2, out_D2, D2_out, N_D2
     dL_D2, doutD2 = not_cell_wrapper(state_not_D2, params_not)
     dN_D2 = population(N_D2, r_X)
 
     # not D3: D3
-    state_not_D3 = L_D3, out, D3_out, N_D3
+    state_not_D3 = L_D3, out_D3, D3_out, N_D3
     dL_D3, doutD3 = not_cell_wrapper(state_not_D3, params_not)
     dN_D3 = population(N_D3, r_X)
 
@@ -1268,7 +1268,7 @@ def DECODER_3_8_model(state, T, params):
     N_D0_A0, N_D0_A1, N_D0_A2, N_D1_A0, N_D1_A1, N_D1_A2, N_D2_A0, N_D2_A1, N_D2_A2, N_D3_A0, N_D3_A1, N_D3_A2, \
     N_D4_A0, N_D4_A1, N_D4_A2, N_D5_A0, N_D5_A1, N_D5_A2, N_D6_A0, N_D6_A1, N_D6_A2, N_D7_A0, N_D7_A1, N_D7_A2, \
     N_D0, N_D1, N_D2, N_D3, N_D4, N_D5, N_D6, N_D7 = state[30:62]
-    out = state[62]
+    out_D0, out_D1, out_D2, out_D3, out_D4, out_D5, out_D6, out_D7 = state[62:70]
 
     """
      D0
@@ -1446,42 +1446,42 @@ def DECODER_3_8_model(state, T, params):
     """
 
     # not D0: D0
-    state_not_D0 = L_D0, out, D0_out, N_D0
+    state_not_D0 = L_D0, out_D0, D0_out, N_D0
     dL_D0, doutD0 = not_cell_wrapper(state_not_D0, params_not)
     dN_D0 = population(N_D0, r_X)
 
     # not D1: D1
-    state_not_D1 = L_D1, out, D1_out, N_D1
+    state_not_D1 = L_D1, out_D1, D1_out, N_D1
     dL_D1, doutD1 = not_cell_wrapper(state_not_D1, params_not)
     dN_D1 = population(N_D1, r_X)
 
     # not D2: D2
-    state_not_D2 = L_D2, out, D2_out, N_D2
+    state_not_D2 = L_D2, out_D2, D2_out, N_D2
     dL_D2, doutD2 = not_cell_wrapper(state_not_D2, params_not)
     dN_D2 = population(N_D2, r_X)
 
     # not D3: D3
-    state_not_D3 = L_D3, out, D3_out, N_D3
+    state_not_D3 = L_D3, out_D3, D3_out, N_D3
     dL_D3, doutD3 = not_cell_wrapper(state_not_D3, params_not)
     dN_D3 = population(N_D3, r_X)
 
     # not D4: D4
-    state_not_D4 = L_D4, out, D4_out, N_D4
+    state_not_D4 = L_D4, out_D4, D4_out, N_D4
     dL_D4, doutD4 = not_cell_wrapper(state_not_D4, params_not)
     dN_D4 = population(N_D4, r_X)
 
     # not D5: D5
-    state_not_D5 = L_D5, out, D5_out, N_D5
+    state_not_D5 = L_D5, out_D5, D5_out, N_D5
     dL_D5, doutD5 = not_cell_wrapper(state_not_D5, params_not)
     dN_D5 = population(N_D5, r_X)
 
     # not D6: D6
-    state_not_D6 = L_D6, out, D6_out, N_D6
+    state_not_D6 = L_D6, out_D6, D6_out, N_D6
     dL_D6, doutD6 = not_cell_wrapper(state_not_D6, params_not)
     dN_D6 = population(N_D6, r_X)
 
     # not D7: D7
-    state_not_D7 = L_D7, out, D7_out, N_D7
+    state_not_D7 = L_D7, out_D7, D7_out, N_D7
     dL_D7, doutD7 = not_cell_wrapper(state_not_D7, params_not)
     dN_D7 = population(N_D7, r_X)
 
