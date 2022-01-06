@@ -47,7 +47,7 @@ params = (delta_L, gamma_L_X, n_y, theta_L_X, eta_x, omega_x, m_x, delta_x, delt
          rho_I0_a, rho_I0_b, rho_I1_a, rho_I1_b, rho_I2_a, rho_I2_b, rho_I3_a, rho_I3_b)
 """
 
-Y0 = np.zeros(85)
+Y0 = np.zeros(86)
 
 # number of cells: toggle switches
 N_A0 = np.array([1,1])
@@ -57,8 +57,8 @@ Y0[4:6] = N_A0
 Y0[10:12] = N_A1
 Y0[16:18] = N_A2
 
-#Y0[30-3+18:62-3+18] = 1
-Y0[45:77] = 1
+#Y0[31-3+18:63-3+18] = 1
+Y0[46:78] = 1
 
 
 """
@@ -95,7 +95,7 @@ for iteration, state in enumerate(states):
     t1 = t_end
     dt = t_end/N
     T = np.arange(0,t1+dt,dt)
-    Y = np.zeros([1+N,85])
+    Y = np.zeros([1+N,86])
     Y[0,:] = Y0
 
 
@@ -225,7 +225,7 @@ ax11.set_ylabel("Conc. [nM]")
 
 #plt.suptitle("$out = \\overline{S}_1 \\overline{S}_0 I_0 \\vee \\overline{S}_1 S_0 I_1 \\vee S_1 \\overline{S}_0 I_2 \\vee S_1 S_0 I_3$")
 plt.gcf().set_size_inches(25,20)
-plt.savefig("figs\\CBLB_ode.pdf", bbox_inches = 'tight')
+plt.savefig("figs\\CBLB_3_8_Decoderode_ode.pdf", bbox_inches = 'tight')
 
 plt.show()  
 

@@ -180,7 +180,7 @@ ax6.set_ylabel("Conc. [nM]")
 
 #plt.suptitle("$out = \\overline{S}_1 \\overline{S}_0 I_0 \\vee \\overline{S}_1 S_0 I_1 \\vee S_1 \\overline{S}_0 I_2 \\vee S_1 S_0 I_3$")
 plt.gcf().set_size_inches(15,10)
-plt.savefig("figs\\CBLB_ode.pdf", bbox_inches = 'tight')
+plt.savefig("figs\\CBLB_2_4_Decoder_ode.pdf", bbox_inches = 'tight')
 
 plt.show()  
 

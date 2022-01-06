@@ -1422,11 +1422,11 @@ def DECODER_3_8_model(state, T, params):
 
     A0, A1, A2 = state[:3]
     D0_out, D1_out, D2_out, D3_out, D4_out, D5_out, D6_out, D7_out = state[3:11]
-    L_D1_A0, L_D2_A1, L_D3_A0, L_D3_A1, L_D4_A2, L_D5_A0, L_D5_A2, L_D6_A0, L_D7_A0, L_D7_A1, L_D7_A2, L_D0, L_D1, L_D2, L_D3, L_D4, L_D5, L_D6, L_D7 = state[11:30]
+    L_D1_A0, L_D2_A1, L_D3_A0, L_D3_A1, L_D4_A2, L_D5_A0, L_D5_A2, L_D6_A1, L_D6_A2, L_D7_A0, L_D7_A1, L_D7_A2, L_D0, L_D1, L_D2, L_D3, L_D4, L_D5, L_D6, L_D7 = state[11:31]
     N_D0_A0, N_D0_A1, N_D0_A2, N_D1_A0, N_D1_A1, N_D1_A2, N_D2_A0, N_D2_A1, N_D2_A2, N_D3_A0, N_D3_A1, N_D3_A2, \
     N_D4_A0, N_D4_A1, N_D4_A2, N_D5_A0, N_D5_A1, N_D5_A2, N_D6_A0, N_D6_A1, N_D6_A2, N_D7_A0, N_D7_A1, N_D7_A2, \
-    N_D0, N_D1, N_D2, N_D3, N_D4, N_D5, N_D6, N_D7 = state[30:62]
-    out_D0, out_D1, out_D2, out_D3, out_D4, out_D5, out_D6, out_D7 = state[62:70]
+    N_D0, N_D1, N_D2, N_D3, N_D4, N_D5, N_D6, N_D7 = state[31:63]
+    out_D0, out_D1, out_D2, out_D3, out_D4, out_D5, out_D6, out_D7 = state[63:71]
 
     """
      D0
@@ -1560,20 +1560,21 @@ def DECODER_3_8_model(state, T, params):
     """
     dD6_out = 0
 
-    # not A0: D6_A0
-    state_not_D6_A0 = L_D6_A0, D6_out, A0, N_D6_A0
-    dL_D6_A0, dd = not_cell_wrapper(state_not_D6_A0, params_not)
-    dD6_out += dd
+    # yes A0: D6_A0
+    state_yes_D6_A0 = D6_out, A0, N_D6_A0
+    dD6_out += yes_cell_wrapper(state_yes_D6_A0, params_yes)
     dN_D6_A0 = population(N_D6_A0, r_X)
 
-    # yes A1: D6_A1
-    state_yes_D6_A1 = D6_out, A1, N_D6_A1
-    dD6_out += yes_cell_wrapper(state_yes_D6_A1, params_yes)
+    # not A1: D6_A1
+    state_not_D6_A1 = L_D6_A1, D6_out, A1, N_D6_A1
+    dL_D6_A1, dd = not_cell_wrapper(state_not_D6_A1, params_not)
+    dD6_out += dd
     dN_D6_A1 = population(N_D6_A1, r_X)
 
-    # yes A2: D6_A2
-    state_yes_D6_A2 = D6_out, A2, N_D6_A2
-    dD6_out += yes_cell_wrapper(state_yes_D6_A2, params_yes)
+    # not A2: D6_A2
+    state_not_D6_A2 = L_D6_A2, D6_out, A2, N_D6_A2
+    dL_D6_A2, dd = not_cell_wrapper(state_not_D6_A2, params_not)
+    dD6_out += dd
     dN_D6_A2 = population(N_D6_A2, r_X)
 
     """
@@ -1647,7 +1648,7 @@ def DECODER_3_8_model(state, T, params):
 
     dstate = np.array([dA0, dA1, DA2,
                        dD0_out, dD1_out, dD2_out, dD3_out, dD4_out, dD5_out, dD6_out, dD7_out,
-                       dL_D1_A0, dL_D2_A1, dL_D3_A0, dL_D3_A1, dL_D4_A2, dL_D5_A0, dL_D5_A2, dL_D6_A0, dL_D7_A0, dL_D7_A1, dL_D7_A2,
+                       dL_D1_A0, dL_D2_A1, dL_D3_A0, dL_D3_A1, dL_D4_A2, dL_D5_A0, dL_D5_A2, dL_D6_A1, dL_D6_A2, dL_D7_A0, dL_D7_A1, dL_D7_A2,
                        dL_D0, dL_D1, dL_D2, dL_D3, dL_D4, dL_D5, dL_D6, dL_D7,
                        dN_D0_A0, dN_D0_A1, dN_D0_A2, dN_D1_A0, dN_D1_A1, dN_D1_A2, dN_D2_A0, dN_D2_A1, dN_D2_A2,
                        dN_D3_A0, dN_D3_A1, dN_D3_A2, dN_D4_A0, dN_D4_A1, dN_D4_A2, dN_D5_A0, dN_D5_A1, dN_D5_A2, dN_D6_A0, dN_D6_A1, dN_D6_A2,

@@ -10,7 +10,7 @@ rho_y = 0
 params = delta_L, gamma_L_X, n_y, theta_L_X, eta_x, omega_x, m_x, delta_x, rho_x, gamma_x, theta_x, r_X
 
 # A0, A1, A2
-A = np.array([0, 0, 0])
+A = np.array([1, 1, 1])
 
 
 
@@ -19,8 +19,8 @@ t_end = 1500
 N = t_end
 
 
-Y0 = np.zeros(70)
-Y0[30:62] = 1 # number of cells
+Y0 = np.zeros(71)
+Y0[31:63] = 1 # number of cells
 
 Y0[:3] = A
 
@@ -30,7 +30,7 @@ T = np.linspace(0, t_end, N)
 t1 = t_end
 dt = t_end/N
 T = np.arange(0,t1+dt,dt)
-Y = np.zeros([1+N,70])
+Y = np.zeros([1+N,71])
 Y[0,:] = Y0
 
 r = ode(DECODER_3_8_model_ODE).set_integrator('zvode', method='bdf')
