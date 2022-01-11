@@ -8,7 +8,7 @@ import pandas as pd
 import multiprocessing
 from random import randint
 
-from model_clb import model_clb, param_references
+from model_clb_2_4_Decoder import model_clb, param_references
  
 
 

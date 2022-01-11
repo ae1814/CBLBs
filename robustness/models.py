@@ -1058,6 +1058,164 @@ def CLB_model(state, T, params):
     return dstate
 
 
+def CLB_model_2_4_Decoder(state, T, params):
+    delta_L, gamma_L_X, n_y, theta_L_X, eta_x, omega_x, m_x, delta_x, delta_y, rho_x, rho_y, gamma_x, theta_x, r_X, r_Y, rho_A0_a, rho_A0_b, rho_A1_a, rho_A1_b = params
+
+    """
+    latches
+    """
+    #########
+    # params
+
+    # set params for symmetric toggle switch topology
+    gamma_L_Y, theta_L_Y = gamma_L_X, theta_L_X
+    n_x, m_y = n_y, m_x
+    eta_y, omega_y = eta_x, omega_x
+
+    params_toggle = [delta_L, gamma_L_X, gamma_L_Y, n_x, n_y, theta_L_X, theta_L_Y, eta_x, eta_y, omega_x, omega_y, m_x,
+                     m_y, delta_x, delta_y, rho_x, rho_y, r_X, r_Y]
+
+    # degradation rates for induction of switches are specific for each toggle switch
+    params_toggle_I0 = params_toggle.copy()
+    params_toggle_I0[-4:-2] = rho_A0_a, rho_A0_b
+    params_toggle_I1 = params_toggle.copy()
+    params_toggle_I1[-4:-2] = rho_A1_a, rho_A1_b
+    # params_toggle_I2 =  params_toggle.copy()
+    # params_toggle_I2[-4:-2] = rho_I2_a, rho_I2_b
+    # params_toggle_I3 =  params_toggle.copy()
+    # params_toggle_I3[-4:-2] = rho_I3_a, rho_I3_b
+
+    #########
+    # states
+
+    # latch I0
+    A0_L_A, A0_L_B, A0_a, A0_b, A0_N_a, A0_N_b = state[:6]
+    state_toggle_IO = A0_L_A, A0_L_B, A0_a, A0_b, A0_N_a, A0_N_b
+
+    # latch I1
+    A1_L_A, A1_L_B, A1_a, A1_b, A1_N_a, A1_N_b = state[6:12]
+    state_toggle_I1 = A1_L_A, A1_L_B, A1_a, A1_b, A1_N_a, A1_N_b
+
+    # latch I2
+    # I2_L_A, I2_L_B, I2_a, I2_b, I2_N_a, I2_N_b = state[12:18]
+    # state_toggle_I2 = I2_L_A, I2_L_B, I2_a, I2_b, I2_N_a, I2_N_b
+
+    # latch I3
+    # I3_L_A, I3_L_B, I3_a, I3_b, I3_N_a, I3_N_b = state[18:24]
+    # state_toggle_I3 = I3_L_A, I3_L_B, I3_a, I3_b, I3_N_a, I3_N_b
+
+    #########
+    # models
+    dstate_toggle_IO = toggle_model(state_toggle_IO, T, params_toggle_I0)
+    dstate_toggle_I1 = toggle_model(state_toggle_I1, T, params_toggle_I1)
+    # dstate_toggle_I2 = toggle_model(state_toggle_I2, T, params_toggle_I2)
+    # dstate_toggle_I3 = toggle_model(state_toggle_I3, T, params_toggle_I3)
+
+    dstate_toggles = np.append(dstate_toggle_IO, dstate_toggle_I1, axis=0)
+
+    """
+    mux
+    """
+    #########
+    # params
+    params_DECODER = delta_L, gamma_L_X, n_y, theta_L_X, eta_x, omega_x, m_x, delta_x, rho_x, gamma_x, theta_x, r_X
+
+    #########
+    # state
+    A0, A1 = A0_a, A1_a
+    state_DECODER = np.append([A0, A1], state[12:], axis=0)
+
+    ########
+    # model
+    dstate_DECODER = DECODER_2_4_model(state_DECODER, T, params_DECODER)
+    dstate_DECODER = dstate_DECODER[2:]  # ignore dI0, dI1, dI2, dI3
+
+    """
+    return
+    """
+    dstate = np.append(dstate_toggles, dstate_DECODER, axis=0)
+    return dstate
+
+
+def CLB_model_3_8_Decoder(state, T, params):
+    delta_L, gamma_L_X, n_y, theta_L_X, eta_x, omega_x, m_x, delta_x, delta_y, rho_x, rho_y, gamma_x, theta_x, r_X, r_Y, rho_A0_a, rho_A0_b, rho_A1_a, rho_A1_b, rho_A2_a, rho_A2_b = params
+
+    """
+    latches
+    """
+    #########
+    # params
+
+    # set params for symmetric toggle switch topology
+    gamma_L_Y, theta_L_Y = gamma_L_X, theta_L_X
+    n_x, m_y = n_y, m_x
+    eta_y, omega_y = eta_x, omega_x
+
+    params_toggle = [delta_L, gamma_L_X, gamma_L_Y, n_x, n_y, theta_L_X, theta_L_Y, eta_x, eta_y, omega_x, omega_y, m_x,
+                     m_y, delta_x, delta_y, rho_x, rho_y, r_X, r_Y]
+
+    # degradation rates for induction of switches are specific for each toggle switch
+    params_toggle_I0 = params_toggle.copy()
+    params_toggle_I0[-4:-2] = rho_A0_a, rho_A0_b
+    params_toggle_I1 = params_toggle.copy()
+    params_toggle_I1[-4:-2] = rho_A1_a, rho_A1_b
+    params_toggle_I2 = params_toggle.copy()
+    params_toggle_I2[-4:-2] = rho_A2_a, rho_A2_b
+    # params_toggle_I3 =  params_toggle.copy()
+    # params_toggle_I3[-4:-2] = rho_I3_a, rho_I3_b
+
+    #########
+    # states
+
+    # latch I0
+    A0_L_A, A0_L_B, A0_a, A0_b, A0_N_a, A0_N_b = state[:6]
+    state_toggle_IO = A0_L_A, A0_L_B, A0_a, A0_b, A0_N_a, A0_N_b
+
+    # latch I1
+    A1_L_A, A1_L_B, A1_a, A1_b, A1_N_a, A1_N_b = state[6:12]
+    state_toggle_I1 = A1_L_A, A1_L_B, A1_a, A1_b, A1_N_a, A1_N_b
+
+    # latch I2
+    A2_L_A, A2_L_B, A2_a, A2_b, A2_N_a, A2_N_b = state[12:18]
+    state_toggle_I2 = A2_L_A, A2_L_B, A2_a, A2_b, A2_N_a, A2_N_b
+
+    # latch I3
+    # I3_L_A, I3_L_B, I3_a, I3_b, I3_N_a, I3_N_b = state[18:24]
+    # state_toggle_I3 = I3_L_A, I3_L_B, I3_a, I3_b, I3_N_a, I3_N_b
+
+    #########
+    # models
+    dstate_toggle_IO = toggle_model(state_toggle_IO, T, params_toggle_I0)
+    dstate_toggle_I1 = toggle_model(state_toggle_I1, T, params_toggle_I1)
+    dstate_toggle_I2 = toggle_model(state_toggle_I2, T, params_toggle_I2)
+    # dstate_toggle_I3 = toggle_model(state_toggle_I3, T, params_toggle_I3)
+
+    dstate_toggles = np.append(np.append(dstate_toggle_IO, dstate_toggle_I1, axis=0), dstate_toggle_I2, axis=0)
+
+    """
+    mux
+    """
+    #########
+    # params
+    params_DECODER = delta_L, gamma_L_X, n_y, theta_L_X, eta_x, omega_x, m_x, delta_x, rho_x, gamma_x, theta_x, r_X
+
+    #########
+    # state
+    A0, A1, A2 = A0_a, A1_a, A2_a
+    state_DECODER = np.append([A0, A1, A2], state[18:], axis=0)
+
+    ########
+    # model
+    dstate_DECODER = DECODER_3_8_model(state_DECODER, T, params_DECODER)
+    dstate_DECODER = dstate_DECODER[3:]  # ignore dI0, dI1, dI2, dI3
+
+    """
+    return
+    """
+    dstate = np.append(dstate_toggles, dstate_DECODER, axis=0)
+    return dstate
+
+
 def CLB_model_stochastic(state, params, Omega):
     delta_L, gamma_L_X, n_y, theta_L_X, eta_x, omega_x, m_x, delta_x, delta_y, rho_x, rho_y, gamma_x, theta_x, r_X, r_Y, rho_I0_a, rho_I0_b, rho_I1_a, rho_I1_b, rho_I2_a, rho_I2_b, rho_I3_a, rho_I3_b = params
 
@@ -1252,12 +1410,12 @@ def DECODER_3_8_model(state, T, params):
 
     A0, A1, A2 = state[:3]
     D0_out, D1_out, D2_out, D3_out, D4_out, D5_out, D6_out, D7_out = state[3:11]
-    L_D1_A0, L_D2_A1, L_D3_A0, L_D3_A1, L_D4_A2, L_D5_A0, L_D5_A2, L_D6_A0, L_D7_A0, L_D7_A1, L_D7_A2, L_D0, L_D1, L_D2, L_D3, L_D4, L_D5, L_D6, L_D7 = state[
-                                                                                                                                                        11:30]
+    L_D1_A0, L_D2_A1, L_D3_A0, L_D3_A1, L_D4_A2, L_D5_A0, L_D5_A2, L_D6_A1, L_D6_A2, L_D7_A0, L_D7_A1, L_D7_A2, L_D0, L_D1, L_D2, L_D3, L_D4, L_D5, L_D6, L_D7 = state[
+                                                                                                                                                                 11:31]
     N_D0_A0, N_D0_A1, N_D0_A2, N_D1_A0, N_D1_A1, N_D1_A2, N_D2_A0, N_D2_A1, N_D2_A2, N_D3_A0, N_D3_A1, N_D3_A2, \
     N_D4_A0, N_D4_A1, N_D4_A2, N_D5_A0, N_D5_A1, N_D5_A2, N_D6_A0, N_D6_A1, N_D6_A2, N_D7_A0, N_D7_A1, N_D7_A2, \
-    N_D0, N_D1, N_D2, N_D3, N_D4, N_D5, N_D6, N_D7 = state[30:62]
-    out_D0, out_D1, out_D2, out_D3, out_D4, out_D5, out_D6, out_D7 = state[62:70]
+    N_D0, N_D1, N_D2, N_D3, N_D4, N_D5, N_D6, N_D7 = state[31:63]
+    out_D0, out_D1, out_D2, out_D3, out_D4, out_D5, out_D6, out_D7 = state[63:71]
 
     """
      D0
@@ -1391,20 +1549,21 @@ def DECODER_3_8_model(state, T, params):
     """
     dD6_out = 0
 
-    # not A0: D6_A0
-    state_not_D6_A0 = L_D6_A0, D6_out, A0, N_D6_A0
-    dL_D6_A0, dd = not_cell_wrapper(state_not_D6_A0, params_not)
-    dD6_out += dd
+    # yes A0: D6_A0
+    state_yes_D6_A0 = D6_out, A0, N_D6_A0
+    dD6_out += yes_cell_wrapper(state_yes_D6_A0, params_yes)
     dN_D6_A0 = population(N_D6_A0, r_X)
 
-    # yes A1: D6_A1
-    state_yes_D6_A1 = D6_out, A1, N_D6_A1
-    dD6_out += yes_cell_wrapper(state_yes_D6_A1, params_yes)
+    # not A1: D6_A1
+    state_not_D6_A1 = L_D6_A1, D6_out, A1, N_D6_A1
+    dL_D6_A1, dd = not_cell_wrapper(state_not_D6_A1, params_not)
+    dD6_out += dd
     dN_D6_A1 = population(N_D6_A1, r_X)
 
-    # yes A2: D6_A2
-    state_yes_D6_A2 = D6_out, A2, N_D6_A2
-    dD6_out += yes_cell_wrapper(state_yes_D6_A2, params_yes)
+    # not A2: D6_A2
+    state_not_D6_A2 = L_D6_A2, D6_out, A2, N_D6_A2
+    dL_D6_A2, dd = not_cell_wrapper(state_not_D6_A2, params_not)
+    dD6_out += dd
     dN_D6_A2 = population(N_D6_A2, r_X)
 
     """
@@ -1478,8 +1637,8 @@ def DECODER_3_8_model(state, T, params):
 
     dstate = np.array([dA0, dA1, DA2,
                        dD0_out, dD1_out, dD2_out, dD3_out, dD4_out, dD5_out, dD6_out, dD7_out,
-                       dL_D1_A0, dL_D2_A1, dL_D3_A0, dL_D3_A1, dL_D4_A2, dL_D5_A0, dL_D5_A2, dL_D6_A0, dL_D7_A0,
-                       dL_D7_A1, dL_D7_A2,
+                       dL_D1_A0, dL_D2_A1, dL_D3_A0, dL_D3_A1, dL_D4_A2, dL_D5_A0, dL_D5_A2, dL_D6_A1, dL_D6_A2,
+                       dL_D7_A0, dL_D7_A1, dL_D7_A2,
                        dL_D0, dL_D1, dL_D2, dL_D3, dL_D4, dL_D5, dL_D6, dL_D7,
                        dN_D0_A0, dN_D0_A1, dN_D0_A2, dN_D1_A0, dN_D1_A1, dN_D1_A2, dN_D2_A0, dN_D2_A1, dN_D2_A2,
                        dN_D3_A0, dN_D3_A1, dN_D3_A2, dN_D4_A0, dN_D4_A1, dN_D4_A2, dN_D5_A0, dN_D5_A1, dN_D5_A2,
@@ -1516,9 +1675,17 @@ def CLB_model_ODE(T, state, params):
     return CLB_model(state, T, params)
 
 
-def DECODER_2_4_model_ODE(T, state, params):
-    return DECODER_2_4_model(state, T, params)
+def CLB_model_2_4_Decoder_ODE(T, state, params):
+    return CLB_model_2_4_Decoder(state, T, params)
+
+
+def CLB_model_3_8_Decoder_ODE(T, state, params):
+    return CLB_model_3_8_Decoder(state, T, params)
 
 
 def DECODER_3_8_model_ODE(T, state, params):
     return DECODER_3_8_model(state, T, params)
+
+
+def DECODER_2_4_model_ODE(T, state, params):
+    return DECODER_2_4_model(state, T, params)
