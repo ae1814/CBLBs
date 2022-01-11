@@ -8,7 +8,7 @@ import pandas as pd
 import multiprocessing
 from random import randint
 
-from model_clb_2_4_Decoder import model_clb, param_references
+from model_clb_2_4_Decoder import model_clb_2_4_Decoder, param_references
  
 
 
@@ -128,7 +128,7 @@ if __name__ == "__main__":
 
 
         #folders = [os.path.join(base_path, "one_bit_model"), os.path.join(base_path, "two_bit_model"), os.path.join(base_path, "three_bit_model")]   
-        model = model_clb()
+        model = model_clb_2_4_Decoder()
         solver = Solver(model)
 
         model_regions = []
